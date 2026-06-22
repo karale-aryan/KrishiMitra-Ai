@@ -1,0 +1,36 @@
+# System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Build and Dependency Directories
+node_modules/
+dist/
+target/
+.mvn/
+
+# Log Files
+*.log
+backend-startup.log
+
+# Environment and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+!*.env.example
+
+# Temporary / OS generated files
+tmp/
+temp/

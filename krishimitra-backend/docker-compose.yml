@@ -1,0 +1,71 @@
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: krishimitra-db
+    restart: unless-stopped
+    ports:
+      - "${KRISHIMITRA_DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${KRISHIMITRA_DB_NAME:-krishimitra}
+      POSTGRES_USER: ${KRISHIMITRA_DB_USERNAME:-krishimitra}
+      POSTGRES_PASSWORD: ${KRISHIMITRA_DB_PASSWORD:-krishimitra_secret}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ai-sidecar:
+    build:
+      context: ./ai-sidecar
+      dockerfile: Dockerfile
+    container_name: krishimitra-ai-sidecar
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - LOG_LEVEL=info
+    volumes:
+      - ai-model-cache:/root/.cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: krishimitra-backend-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - KRISHIMITRA_DB_HOST=postgres
+      - KRISHIMITRA_DB_PORT=5432
+      - KRISHIMITRA_DB_NAME=${KRISHIMITRA_DB_NAME:-krishimitra}
+      - KRISHIMITRA_DB_USERNAME=${KRISHIMITRA_DB_USERNAME:-krishimitra}
+      - KRISHIMITRA_DB_PASSWORD=${KRISHIMITRA_DB_PASSWORD:-krishimitra_secret}
+      - KRISHIMITRA_JWT_SECRET=${KRISHIMITRA_JWT_SECRET:-dGhpc0lzQVZlcnlMb25nU2VjcmV0S2V5Rm9yS3Jpc2hpTWl0cmFBSVBsYXRmb3JtMjAyNg==}
+      - AI_SIDECAR_URL=http://ai-sidecar:8000
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      - upload-data:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres-data:
+  upload-data:
+  ai-model-cache:

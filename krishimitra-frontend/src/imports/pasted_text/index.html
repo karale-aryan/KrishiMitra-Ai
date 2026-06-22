@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KrishiMitra AI - Your AI Kheti Advisor</title>
+<meta content="KrishiMitra AI: Grounded Intelligence for Every Farmer. Just ask in your own language." name="description"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#94d77e",
+                    "on-error": "#ffffff",
+                    "surface-dim": "#dcdad0",
+                    "tertiary-container": "#2c6a14",
+                    "secondary": "#456556",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed": "#022100",
+                    "on-tertiary-fixed-variant": "#175200",
+                    "surface-container": "#f0eee3",
+                    "outline": "#717a6b",
+                    "on-tertiary-fixed": "#052100",
+                    "on-secondary-container": "#4b6b5c",
+                    "surface-tint": "#2e6b20",
+                    "tertiary-fixed": "#aef58e",
+                    "surface-container-low": "#f6f4e9",
+                    "outline-variant": "#c1c9b9",
+                    "inverse-primary": "#94d77e",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#a2e883",
+                    "surface-container-high": "#eae8de",
+                    "secondary-container": "#c7ebd8",
+                    "primary": "#125106",
+                    "inverse-on-surface": "#f3f1e6",
+                    "secondary-fixed-dim": "#accebc",
+                    "on-background": "#1b1c16",
+                    "on-surface": "#1b1c16",
+                    "background": "#fcfaef",
+                    "primary-fixed": "#aff498",
+                    "tertiary-fixed-dim": "#93d875",
+                    "on-secondary-fixed-variant": "#2e4d3f",
+                    "secondary-fixed": "#c7ebd8",
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#30312a",
+                    "on-primary-fixed-variant": "#145207",
+                    "tertiary": "#165100",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#41493d",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e4e3d8",
+                    "primary-container": "#2d6a1f",
+                    "surface-container-highest": "#e4e3d8",
+                    "surface-bright": "#fcfaef",
+                    "surface": "#fcfaef",
+                    "on-secondary-fixed": "#012115",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#a4e88d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "container-max": "1200px",
+                    "margin-desktop": "40px",
+                    "margin-mobile": "16px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-sm": ["Fraunces"],
+                    "display-lg-mobile": ["Fraunces"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Fraunces"],
+                    "display-lg": ["Fraunces"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .wave-container {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .wave-bar {
+            width: 4px;
+            height: 20px;
+            background-color: #125106;
+            border-radius: 2px;
+            animation: wave 1.2s ease-in-out infinite;
+        }
+        @keyframes wave {
+            0%, 100% { height: 10px; }
+            50% { height: 40px; }
+        }
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-up.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed overflow-x-hidden">
+<!-- Refined TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant h-20">
+<div class="max-w-container-max mx-auto h-full flex justify-between items-center px-margin-mobile md:px-margin-desktop">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">eco</span>
+<div class="text-headline-sm font-headline-sm font-bold text-primary">KrishiMitra AI</div>
+</div>
+<nav class="hidden lg:flex items-center gap-10">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#features">Features</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#how-it-works">How it works</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#languages">Languages</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">For teams</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary px-8 py-2.5 rounded-full font-label-md text-label-md transition-all hover:bg-surface-tint hover:shadow-lg active:scale-95">
+                Open the app
+            </button>
+</div>
+</div>
+</header>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative bg-surface py-16 md:py-24 overflow-hidden">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-6 z-10">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container font-label-sm mb-6">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+                    Empowering 100M+ Farmers
+                </div>
+<h1 class="font-display-lg text-display-lg md:text-display-lg leading-tight mb-8">
+                    Your AI kheti advisor — <br/><span class="text-primary italic">just ask</span>, in your own language.
+                </h1>
+<p class="text-body-lg text-on-surface-variant mb-10 max-w-lg">
+                    Speak naturally to get instant, expert advice on crop health, soil quality, and government schemes. No typing, just talking.
+                </p>
+<div class="flex flex-wrap gap-4 mb-12">
+<button class="bg-primary text-on-primary px-10 py-4 rounded-full font-label-md text-lg shadow-xl shadow-primary/10 hover:shadow-primary/20 transition-all hover:-translate-y-0.5">
+                        Start Talking Now
+                    </button>
+<button class="border border-outline text-primary px-10 py-4 rounded-full font-label-md text-lg hover:bg-surface-container-low transition-all">
+                        Watch how it works
+                    </button>
+</div>
+<!-- Micro Trust Signals -->
+<div class="flex items-center gap-8 border-t border-outline-variant pt-8">
+<div class="flex flex-col">
+<span class="text-headline-sm text-primary font-bold">14+</span>
+<span class="text-label-sm text-on-surface-variant opacity-70">Indian Languages</span>
+</div>
+<div class="w-px h-10 bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="text-headline-sm text-primary font-bold">98%</span>
+<span class="text-label-sm text-on-surface-variant opacity-70">Voice Accuracy</span>
+</div>
+<div class="w-px h-10 bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="text-headline-sm text-primary font-bold">24/7</span>
+<span class="text-label-sm text-on-surface-variant opacity-70">Support Access</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-6 relative">
+<div class="relative rounded-[40px] overflow-hidden shadow-2xl border-8 border-white aspect-[4/3] group">
+<img alt="Farmers using technology" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida/AP1WRLsQ7eyCbnkDGZpcKdR8Xim0w5vo6y_m0yZmM6oQe1Z0EoSfjFL47AmHwCYwN7I5AyJqfW5-ScOHfPTlDpIkrKazKW1uwRCE9MV32U5qhGurItX1SAqLm5FtVcB_6_x1eysPl2ijlaZnUgLo7uiGnnhuGBuZVJPTOMIRRTVwTrQzKEztfAS8XBLKl-U8cTyntfS0DPrDMg4tNF_fmZfK0IoCGVP-dYBojRtygq5sRjBLyWauyE0SfPd4_I8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+<!-- Floating Voice UI -->
+<div class="absolute bottom-8 right-8 left-8 bg-surface/95 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-white/20">
+<div class="flex items-center gap-4 mb-3">
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">mic</span>
+</div>
+<div>
+<p class="text-label-sm text-primary uppercase font-bold tracking-wider">Listening...</p>
+<p class="text-body-md font-medium">"How do I treat yellow rust in wheat?"</p>
+</div>
+</div>
+<div class="wave-container h-8">
+<div class="wave-bar bg-primary/20" style="animation-delay: 0.1s"></div>
+<div class="wave-bar bg-primary/40" style="animation-delay: 0.3s"></div>
+<div class="wave-bar bg-primary/60" style="animation-delay: 0.5s"></div>
+<div class="wave-bar bg-primary/80" style="animation-delay: 0.2s"></div>
+<div class="wave-bar bg-primary" style="animation-delay: 0.4s"></div>
+<div class="wave-bar bg-primary/80" style="animation-delay: 0.6s"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Trust Strip -->
+<section class="bg-surface-container-low border-y border-outline-variant py-10 overflow-hidden">
+<div class="max-w-container-max mx-auto px-margin-desktop flex flex-col items-center">
+<p class="text-label-sm text-on-surface-variant opacity-60 uppercase tracking-[0.2em] mb-8">Trusted by Leading Agricultural Organizations</p>
+<div class="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">account_balance</span>
+<span class="font-headline-sm text-lg font-bold">NITI Aayog</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">agriculture</span>
+<span class="font-headline-sm text-lg font-bold">ICAR</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">public</span>
+<span class="font-headline-sm text-lg font-bold">Digital India</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">cloud_done</span>
+<span class="font-headline-sm text-lg font-bold">Bhashini</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Service Grid Section -->
+<section class="py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto" id="features">
+<div class="text-center mb-20 reveal-up">
+<h2 class="font-headline-md text-display-lg-mobile md:text-headline-md mb-6 text-primary">Grounded Intelligence for Farmers</h2>
+<p class="max-w-2xl mx-auto text-body-lg text-on-surface-variant">Empowering every hand that feeds the nation with real-time, expert agricultural advice through 6 core modules.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Feature 1 -->
+<div class="bg-white p-10 rounded-[32px] border border-outline-variant hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all group reveal-up">
+<div class="w-16 h-16 bg-primary-container/20 rounded-2xl flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">settings_voice</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-4">AI Voice Assistant</h3>
+<p class="text-on-surface-variant mb-8 line-clamp-3">Talk to the app like a human advisor. Voice-to-text models trained on rural dialects ensure your intent is understood perfectly.</p>
+<a class="inline-flex items-center gap-2 text-primary font-label-md group/link" href="#">
+                    Learn more <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+<!-- Feature 2 -->
+<div class="bg-white p-10 rounded-[32px] border border-outline-variant hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all group reveal-up" style="transition-delay: 0.1s">
+<div class="w-16 h-16 bg-primary-container/20 rounded-2xl flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">potted_plant</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-4">Crop Recommendation</h3>
+<p class="text-on-surface-variant mb-8 line-clamp-3">Suggests optimal crops based on soil health and seasonal trends. Maximize your yield with data-driven planting choices.</p>
+<a class="inline-flex items-center gap-2 text-primary font-label-md group/link" href="#">
+                    Learn more <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+<!-- Feature 3 -->
+<div class="bg-white p-10 rounded-[32px] border border-outline-variant hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all group reveal-up" style="transition-delay: 0.2s">
+<div class="w-16 h-16 bg-primary-container/20 rounded-2xl flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">thunderstorm</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-4">Climate Risk Alerts</h3>
+<p class="text-on-surface-variant mb-8 line-clamp-3">Hyper-local weather warnings powered by real-time satellite data. Protect your crops from sudden climatic shifts.</p>
+<a class="inline-flex items-center gap-2 text-primary font-label-md group/link" href="#">
+                    Learn more <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+<!-- Feature 4 -->
+<div class="bg-white p-10 rounded-[32px] border border-outline-variant hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all group reveal-up">
+<div class="w-16 h-16 bg-primary-container/20 rounded-2xl flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">photo_camera</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-4">Disease Detection</h3>
+<p class="text-on-surface-variant mb-8 line-clamp-3">Identifies pests and diseases from simple photos. Computer vision trained on 10,000+ plant species for instant diagnosis.</p>
+<a class="inline-flex items-center gap-2 text-primary font-label-md group/link" href="#">
+                    Learn more <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+<!-- Feature 5 -->
+<div class="bg-white p-10 rounded-[32px] border border-outline-variant hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all group reveal-up" style="transition-delay: 0.1s">
+<div class="w-16 h-16 bg-primary-container/20 rounded-2xl flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">description</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-4">Scheme Finder</h3>
+<p class="text-on-surface-variant mb-8 line-clamp-3">Personalized government subsidy alerts. We map your profile to active portals to ensure no farmer is left behind.</p>
+<a class="inline-flex items-center gap-2 text-primary font-label-md group/link" href="#">
+                    Learn more <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+<!-- Feature 6 -->
+<div class="bg-white p-10 rounded-[32px] border border-outline-variant hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all group reveal-up" style="transition-delay: 0.2s">
+<div class="w-16 h-16 bg-primary-container/20 rounded-2xl flex items-center justify-center mb-8 text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">translate</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-4">Neural Translation</h3>
+<p class="text-on-surface-variant mb-8 line-clamp-3">Bhashini-powered neural translation of technical reports and documents. Understand complex science in your native tongue.</p>
+<a class="inline-flex items-center gap-2 text-primary font-label-md group/link" href="#">
+                    Learn more <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- How it Works (Dark) -->
+<section class="bg-inverse-surface py-32 text-on-primary overflow-hidden relative" id="how-it-works">
+<div class="max-w-container-max mx-auto px-margin-desktop relative z-10">
+<div class="text-center mb-20 reveal-up">
+<h2 class="font-display-lg text-primary-fixed mb-6">The Intelligence Chain</h2>
+<p class="text-body-lg opacity-70 max-w-2xl mx-auto">Complex technology, simplified into a single seamless conversation for the end user.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6 relative">
+<!-- Step 1 -->
+<div class="group reveal-up">
+<div class="aspect-square bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-primary/20 transition-all hover:border-primary-fixed/30">
+<div class="text-display-lg-mobile font-headline-sm text-primary-fixed opacity-40">01</div>
+<div>
+<h4 class="font-headline-sm text-xl mb-2 text-primary-fixed">Speak</h4>
+<p class="text-sm opacity-60">Input your query naturally in your native tongue.</p>
+</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="group reveal-up" style="transition-delay: 0.1s">
+<div class="aspect-square bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-primary/20 transition-all hover:border-primary-fixed/30">
+<div class="text-display-lg-mobile font-headline-sm text-primary-fixed opacity-40">02</div>
+<div>
+<h4 class="font-headline-sm text-xl mb-2 text-primary-fixed">Transcribe</h4>
+<p class="text-sm opacity-60">High-fidelity transcription captures rural accents.</p>
+</div>
+</div>
+</div>
+<!-- Step 3: Highlighted -->
+<div class="group reveal-up" style="transition-delay: 0.2s">
+<div class="aspect-square bg-primary p-8 rounded-3xl flex flex-col justify-between shadow-2xl shadow-primary-fixed/10 border border-primary-fixed/30 relative">
+<div class="text-display-lg-mobile font-headline-sm text-on-primary">03</div>
+<div>
+<h4 class="font-headline-sm text-xl mb-2 text-white">Translate</h4>
+<p class="text-sm">Semantic mapping via Bhashini Engine.</p>
+</div>
+<div class="absolute -top-3 -right-3 bg-primary-fixed text-on-primary-fixed text-[10px] px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider">Core Engine</div>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="group reveal-up" style="transition-delay: 0.3s">
+<div class="aspect-square bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-primary/20 transition-all hover:border-primary-fixed/30">
+<div class="text-display-lg-mobile font-headline-sm text-primary-fixed opacity-40">04</div>
+<div>
+<h4 class="font-headline-sm text-xl mb-2 text-primary-fixed">Reason</h4>
+<p class="text-sm opacity-60">AI model processes against agri-knowledge base.</p>
+</div>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="group reveal-up" style="transition-delay: 0.4s">
+<div class="aspect-square bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-primary/20 transition-all hover:border-primary-fixed/30">
+<div class="text-display-lg-mobile font-headline-sm text-primary-fixed opacity-40">05</div>
+<div>
+<h4 class="font-headline-sm text-xl mb-2 text-primary-fixed">Speak back</h4>
+<p class="text-sm opacity-60">Receives verified advice in your own voice.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Language Section -->
+<section class="py-32 bg-surface overflow-hidden" id="languages">
+<div class="max-w-container-max mx-auto px-margin-desktop grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+<div class="reveal-up">
+<h2 class="font-display-lg text-display-lg mb-8 leading-tight">Breaking language barriers, <span class="text-primary italic">one village at a time.</span></h2>
+<div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-12">
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">हिन्दी</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">मराठी</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">తెలుగు</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">ಕನ್ನಡ</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">தமிழ்</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">বাংলা</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">ਪੰਜਾਬੀ</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">ગુજરાતી</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">മലയാളം</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">ଓଡ଼ିଆ</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">اردو</span>
+<span class="px-4 py-2 text-center rounded-xl border border-outline-variant bg-white font-medium hover:border-primary hover:text-primary transition-all cursor-default">English</span>
+</div>
+<div class="p-8 bg-surface-container-high rounded-3xl border border-outline-variant">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary text-2xl">menu_book</span>
+<h4 class="font-headline-sm text-primary text-xl">Village Vocabulary</h4>
+</div>
+<p class="text-on-surface-variant leading-relaxed mb-0">Our AI understands not just formal grammar, but the specific agricultural dialects used in mandis and fields across the country. From 'Kharif' patterns to 'Jeevamrut' practices, we speak your language.</p>
+</div>
+</div>
+<div class="relative reveal-up" style="transition-delay: 0.2s">
+<div class="aspect-[4/5] bg-surface-container rounded-[48px] overflow-hidden border border-outline-variant relative group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQ078pQxPNFuhKzJDqFeXqRkftBtMIbRuWKtVdfCqPNESbyR0t3YOYifwdh3iac_j1DhZAd0K_fDzIbuvagGlLdZAwasbdSJ88FhHpvT7fid6UZZoibIxYjFKUgKIHJ1q0OSDGOp76olgk6CL9pgM9LSvRX-M2d5kgm5XDROgAQrD8HfB4-1gnVhPMYqIZe-g1ObbRlgKrQbpwrepfW1M6RdFufax0lRg4pIfy3uw1QxNezhM09inLJTzDeQD8HGVV7v6AoIGXy7o"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-12 left-12 text-white right-12">
+<p class="font-headline-sm text-3xl mb-2">Empowering 100M+</p>
+<p class="opacity-80 text-lg leading-snug">Rural livelihoods through local-first AI. Built for the grassroots, powered by world-class tech.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Banner -->
+<section class="px-margin-mobile md:px-margin-desktop py-24 max-w-container-max mx-auto reveal-up">
+<div class="bg-primary rounded-[56px] p-16 md:p-32 text-center text-on-primary relative overflow-hidden group">
+<img alt="Farmland background" class="absolute inset-0 w-full h-full object-cover opacity-20 transform group-hover:scale-110 transition-transform duration-[10s]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm0PTeJTPd9AQguYFfqD3hm5u9JTxxU1rQzLwuWLGFGbuMx1unTL5gzShBbbVGmBnFkZRbSR2ZwM3N4MiU-FU5LuchLP-1_NwcY5EN9jYh2vw3-uzdS8AEGU6ORdx2Tw4WnlJVJBSVcnLxDJTg5s5Md5faSGdJBV8CXjx9oTfmLO6Ka1NWJKHBXyQKJ6Uw4f_HiQhZpB9tjQR4Ih0EEOJUt1LulEAw6frwg2lRV-bTKl3e_u0c3a-E1FHy9D1o8fqHKq7hBFaL-Kk"/>
+<div class="relative z-10">
+<h2 class="font-display-lg text-display-lg mb-8">Ready to grow better?</h2>
+<p class="text-xl md:text-2xl max-w-2xl mx-auto mb-16 opacity-80 leading-relaxed">Join thousands of farmers using KrishiMitra AI to protect their crops and increase their income today.</p>
+<div class="flex flex-col sm:flex-row gap-6 justify-center">
+<button class="bg-white text-primary px-12 py-5 rounded-full font-bold text-xl hover:bg-surface-container-highest hover:-translate-y-1 transition-all shadow-xl">Download KrishiMitra</button>
+<button class="bg-transparent border-2 border-white/50 text-white px-12 py-5 rounded-full font-bold text-xl hover:bg-white/10 hover:border-white transition-all">Watch Demo Video</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-inverse-surface py-24 px-margin-desktop text-on-surface-variant border-t border-white/5">
+<div class="max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 mb-20">
+<div class="lg:col-span-4">
+<div class="flex items-center gap-2 mb-8">
+<span class="material-symbols-outlined text-primary-fixed text-3xl">eco</span>
+<div class="text-headline-sm font-headline-sm font-bold text-primary-fixed">KrishiMitra AI</div>
+</div>
+<p class="font-body-md text-surface-container-high/60 mb-10 leading-relaxed text-lg">
+                    Grounded Intelligence for Every Farmer. Empowering India's agricultural backbone with cutting-edge, local-first AI technology.
+                </p>
+<div class="flex gap-4">
+<a class="w-12 h-12 rounded-full border border-outline/30 flex items-center justify-center hover:bg-primary-container hover:text-on-primary-container hover:border-transparent transition-all group" href="#">
+<span class="material-symbols-outlined text-xl">language</span>
+</a>
+<a class="w-12 h-12 rounded-full border border-outline/30 flex items-center justify-center hover:bg-primary-container hover:text-on-primary-container hover:border-transparent transition-all group" href="#">
+<span class="material-symbols-outlined text-xl">public</span>
+</a>
+<a class="w-12 h-12 rounded-full border border-outline/30 flex items-center justify-center hover:bg-primary-container hover:text-on-primary-container hover:border-transparent transition-all group" href="#">
+<span class="material-symbols-outlined text-xl">mail</span>
+</a>
+</div>
+</div>
+<div class="lg:col-span-2">
+<h4 class="font-label-md uppercase tracking-[0.2em] text-primary-fixed mb-8">Product</h4>
+<ul class="space-y-4">
+<li><a class="hover:text-primary-fixed transition-colors" href="#features">Features</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#how-it-works">How it works</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#languages">Languages</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">For teams</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Price points</a></li>
+</ul>
+</div>
+<div class="lg:col-span-2">
+<h4 class="font-label-md uppercase tracking-[0.2em] text-primary-fixed mb-8">Company</h4>
+<ul class="space-y-4">
+<li><a class="hover:text-primary-fixed transition-colors" href="#">About Us</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Careers</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Press Kit</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Contact</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Sustainability</a></li>
+</ul>
+</div>
+<div class="lg:col-span-2">
+<h4 class="font-label-md uppercase tracking-[0.2em] text-primary-fixed mb-8">Legal</h4>
+<ul class="space-y-4">
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Terms of Service</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Data Usage</a></li>
+<li><a class="hover:text-primary-fixed transition-colors" href="#">Compliance</a></li>
+</ul>
+</div>
+<div class="lg:col-span-2">
+<h4 class="font-label-md uppercase tracking-[0.2em] text-primary-fixed mb-8">Contact</h4>
+<ul class="space-y-4">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm opacity-50">call</span>
+<span>1800-AGRI-AI</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm opacity-50">mail</span>
+<span>support@krishimitra.ai</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="pt-12 border-t border-outline/10 flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="font-label-sm opacity-50">© 2024 KrishiMitra AI. Grounded Intelligence for Every Farmer.</p>
+<div class="flex gap-8 opacity-50 font-label-sm">
+<a class="hover:underline" href="#">Cookie Policy</a>
+<a class="hover:underline" href="#">Security</a>
+<a class="hover:underline" href="#">Accessibility</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal-up').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Mic button micro-interaction
+    const micBtn = document.querySelector('button');
+    if(micBtn) {
+        micBtn.addEventListener('click', (e) => {
+            if(e.target.innerText.includes('Talking')) {
+                alert('KrishiMitra is ready! Please say something like: "What is the best time to sow mustard in Rajasthan?"');
+            }
+        });
+    }
+</script>
+</body></html>

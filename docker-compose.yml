@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: krishimitra-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: krishimitra
+      POSTGRES_USER: krishimitra
+      POSTGRES_PASSWORD: krishimitra_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - krishimitra_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U krishimitra -d krishimitra"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  krishimitra_pgdata:
+    driver: local
