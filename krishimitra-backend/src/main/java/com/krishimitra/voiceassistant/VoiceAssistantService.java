@@ -150,7 +150,7 @@ public class VoiceAssistantService {
 
         // Step 2: Detect intent and generate advisory directly in the target language
         String intent = advisoryOrchestrator.detectIntent(transcribedText);
-        String advisoryText = advisoryOrchestrator.generateAdvisory(transcribedText, intent, farmerId, effectiveLanguage);
+        String advisoryText = advisoryOrchestrator.generateAdvisory(transcribedText, intent, farmerId, effectiveLanguage, java.util.Collections.emptyList());
 
         // Step 3: Synthesize advisory response to speech
         byte[] responseAudio;
