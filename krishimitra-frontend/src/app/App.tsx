@@ -250,7 +250,7 @@ function Hero({ onOpenApp, onStartTalking }: { onOpenApp: () => void; onStartTal
         style={{ background: "radial-gradient(circle, #aff49820 0%, transparent 70%)" }}
       />
 
-      <div className="max-w-[1200px] mx-auto px-5 md:px-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-4 md:pt-8">
+      <div className="max-w-[1200px] mx-auto px-5 md:px-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left copy */}
         <div className="lg:col-span-6 z-10">
           <motion.div
