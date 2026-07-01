@@ -399,10 +399,10 @@ export const api = {
   },
 
   // Text-based advisory chat (uses browser Web Speech API for STT, no AI sidecar needed)
-  async textChat(queryText: string, language = 'hi', farmerId?: string): Promise<any> {
+  async textChat(queryText: string, language = 'hi', farmerId?: string, history?: {role: string, text: string}[]): Promise<any> {
     return await fetchClient<any>('/api/v1/voice/text-chat', {
       method: 'POST',
-      body: JSON.stringify({ queryText, language, farmerId }),
+      body: JSON.stringify({ queryText, language, farmerId, history }),
     });
   },
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Mic, MicOff, X, Volume2, VolumeX, Send, Cpu, User } from 'lucide-react';
+import { Mic, MicOff, X, Volume2, VolumeX, Send, Cpu, User, Info } from 'lucide-react';
 import { api } from '../services/api';
 
 interface VoiceAssistantModalProps {
@@ -22,15 +22,34 @@ const LANG_BCP47: Record<string, string> = {
   mr: 'mr-IN',
   te: 'te-IN',
   kn: 'kn-IN',
+  gu: 'gu-IN',
+  pa: 'pa-IN',
+  ta: 'ta-IN',
   en: 'en-IN',
 };
 
 const GREETINGS: Record<string, string> = {
   hi: 'नमस्ते! मैं कृषिमित्र हूँ। मैं आपकी कैसे मदद कर सकता हूँ?',
-  mr: 'नमस्कार! मी कृषि मित्र आहे. मी तुमची कशी मदत करू शकतो?',
+  mr: 'नमस्कार! मी कृषि मित्र आहे. मी तुम्हाला कशी मदत करू?',
   te: 'నమస్కారం! నేను కృషిమిత్రను. నేను మీకు ఎలా సహాయపడగలను?',
   kn: 'ನಮಸ್ಕಾರ! ನಾನು ಕೃಷಿಮಿತ್ರ. ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ?',
+  gu: 'નમસ્કાર! હું કૃષિમિત્ર છું. આજે હું તમારી કેવી રીતે મદદ કરી શકું?',
+  pa: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਕ੃਷ਿਮਿਤ੍ਰ ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?',
+  ta: 'வணக்கம்! நான் கிரிஷிமித்ரா. இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?',
   en: 'Hello! I am KrishiMitra. How can I help you today?',
+};
+
+// Fallback chain: if no TTS voice is found for a language, try these alternatives.
+// e.g. Marathi → Hindi (same Devanagari script), Gujarati → Hindi, etc.
+const VOICE_FALLBACK_CHAIN: Record<string, string[]> = {
+  mr: ['hi', 'en'],
+  gu: ['hi', 'en'],
+  pa: ['hi', 'en'],
+  kn: ['te', 'en'],
+  te: ['kn', 'en'],
+  ta: ['en'],
+  hi: ['en'],
+  en: [],
 };
 
 // Browser-native SpeechRecognition (with vendor prefixes)
@@ -54,6 +73,9 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasGreetedRef = useRef<boolean>(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const accumulatedTranscriptRef = useRef<string>('');
+  const interimTextRef = useRef<string>('');
 
   // Load and listen to browser speech voices (since they load asynchronously)
   useEffect(() => {
@@ -78,10 +100,68 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
     ]);
   }, []);
 
-  // ── Browser TTS with improved voice selection & modulation ────────────────
-  const speakText = useCallback((text: string, msgId: string) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+  // ── Helper: find the best TTS voice with fallback chain ────────────────────
+  const findBestVoice = useCallback((targetLang: string, availableVoices: SpeechSynthesisVoice[]): { voice: SpeechSynthesisVoice | null; lang: string } => {
+    // Build the list of languages to try: target first, then fallbacks
+    const langsToTry = [targetLang, ...(VOICE_FALLBACK_CHAIN[targetLang] || ['en'])];
+
+    for (const lang of langsToTry) {
+      const bcp = LANG_BCP47[lang] ?? `${lang}-IN`;
+      const langPrefix = bcp.split('-')[0];
+      const langVoices = availableVoices.filter(v =>
+        v.lang.startsWith(langPrefix) || v.lang.replace('_', '-').startsWith(langPrefix)
+      );
+
+      if (langVoices.length > 0) {
+        // Prefer female/warm voices for a friendly feel
+        const best = langVoices.find(v => {
+          const n = v.name.toLowerCase();
+          return n.includes('female') || n.includes('woman') || n.includes('zira') ||
+                 n.includes('heera') || n.includes('kalpana') || n.includes('hemant');
+        })
+        || langVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft'))
+        || langVoices[0];
+
+        return { voice: best, lang: bcp };
+      }
+    }
+    return { voice: null, lang: LANG_BCP47[targetLang] ?? 'hi-IN' };
+  }, []);
+
+  const fallbackToBrowserTTS = useCallback((cleanText: string, msgId: string) => {
+    if (!window.speechSynthesis) {
+      setIsSpeaking(null);
+      return;
+    }
+
+    const availableVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
+    const { voice: bestVoice, lang: bestLang } = findBestVoice(language, availableVoices);
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = bestLang;
+    if (bestVoice) utterance.voice = bestVoice;
+
+    // Natural, clear modulation — slightly slower for regional languages to ensure clarity
+    const isEnglish = language === 'en';
+    utterance.rate = isEnglish ? 0.95 : 0.92;   // perfectly balanced speed (not too robotic/slow, not too fast)
+    utterance.pitch = 1.05;                       // slightly higher pitch for warm, friendly tone
+    utterance.volume = 1.0;                       // full volume
+
+    utterance.onend = () => setIsSpeaking(null);
+    utterance.onerror = () => setIsSpeaking(null);
+    utteranceRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  }, [language, voices, findBestVoice]);
+
+  // ── High-Quality Backend TTS with Browser Fallback ─────────────────────────
+  const speakText = useCallback(async (text: string, msgId: string) => {
+    // Stop any currently playing audio
+    window.speechSynthesis?.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setIsSpeaking(msgId);
 
     // Clean text: remove markdown, emojis, special chars for cleaner speech
     const cleanText = text
@@ -92,38 +172,32 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
       .replace(/\s{2,}/g, ' ')        // extra whitespace
       .trim();
 
-    const bcp47 = LANG_BCP47[language] ?? 'hi-IN';
-
-    // Select best matching voice for the language from available voices
-    const availableVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
-    let bestVoice: SpeechSynthesisVoice | null = null;
-
-    // Prefer female/warm voices for a friendly feel
-    const langVoices = availableVoices.filter(v => v.lang.startsWith(bcp47.split('-')[0]) || v.lang.replace('_', '-').startsWith(bcp47.split('-')[0]));
-    bestVoice = langVoices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('kalpana')) 
-             || langVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft'))
-             || langVoices[0]
-             || null;
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = bcp47;
-    if (bestVoice) utterance.voice = bestVoice;
-
-    // Natural, clear modulation — slightly slower for regional languages to ensure clarity
-    const isEnglish = language === 'en';
-    utterance.rate = isEnglish ? 0.95 : 0.92;   // perfectly balanced speed (not too robotic/slow, not too fast)
-    utterance.pitch = 1.05;                       // slightly higher pitch for warm, friendly tone
-    utterance.volume = 1.0;                       // full volume
-
-    setIsSpeaking(msgId);
-    utterance.onend = () => setIsSpeaking(null);
-    utterance.onerror = () => setIsSpeaking(null);
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, [language, voices]);
+    try {
+      // 1. Try backend high-quality native TTS (AI4Bharat Indic-TTS)
+      const audioBlob = await api.synthesizeVoice(cleanText, language);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => setIsSpeaking(null);
+      audio.onerror = () => {
+        setIsSpeaking(null);
+        fallbackToBrowserTTS(cleanText, msgId);
+      };
+      
+      await audio.play();
+    } catch (err) {
+      console.warn("Backend TTS failed, falling back to browser TTS", err);
+      fallbackToBrowserTTS(cleanText, msgId);
+    }
+  }, [language, fallbackToBrowserTTS]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis?.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     setIsSpeaking(null);
   }, []);
 
@@ -131,7 +205,14 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
   const queryAdvisory = useCallback(async (queryText: string) => {
     setLoading(true);
     try {
-      const data = await api.textChat(queryText, language, farmerId);
+      // Send history (excluding the current query which is sent separately)
+      // Exclude greeting messages if they don't add value, but Gemini can handle them.
+      const history = messages.map(m => ({
+        role: m.sender === 'assistant' ? 'model' : 'user',
+        text: m.text
+      }));
+
+      const data = await api.textChat(queryText, language, farmerId, history);
       const assistantMsgId = Date.now().toString() + '-res';
       const responseText: string =
         data?.responseText || 'माफ करें, उत्तर नहीं मिला। / Sorry, no response generated.';
@@ -144,7 +225,7 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
     } finally {
       setLoading(false);
     }
-  }, [language, farmerId, addAssistantMessage, speakText]);
+  }, [language, farmerId, messages, addAssistantMessage, speakText]);
 
   // ── Speech Recognition ──────────────────────────────────────────────────────
   const stopRecording = useCallback(() => {
@@ -153,8 +234,23 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
       recognitionRef.current = null;
     }
     setRecording(false);
+    
+    // Combine accumulated and any pending interim text
+    const finalTextToSend = (accumulatedTranscriptRef.current + ' ' + interimTextRef.current).trim();
+    
     setInterimText('');
-  }, []);
+    accumulatedTranscriptRef.current = '';
+    interimTextRef.current = '';
+
+    if (finalTextToSend) {
+      const userMsgId = Date.now().toString();
+      setMessages(prev => [
+        ...prev,
+        { id: userMsgId, sender: 'user', text: finalTextToSend, timestamp: new Date() },
+      ]);
+      queryAdvisory(finalTextToSend);
+    }
+  }, [queryAdvisory]);
 
   const startRecording = useCallback(() => {
     if (!SpeechRecognitionAPI) {
@@ -164,47 +260,52 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
 
     // Cancel any running speech output before listening
     window.speechSynthesis?.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     setIsSpeaking(null);
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = LANG_BCP47[language] ?? 'hi-IN';
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+    recognition.continuous = true; // Stay open so user can pause without being cut off!
 
     recognition.onstart = () => {
       setRecording(true);
       setInterimText('');
+      accumulatedTranscriptRef.current = '';
+      interimTextRef.current = '';
     };
 
     recognition.onresult = (event: any) => {
       let interim = '';
-      let finalText = '';
+      let finalForThisEvent = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalText += transcript;
+          finalForThisEvent += transcript + ' ';
         } else {
           interim += transcript;
         }
       }
-      setInterimText(interim || finalText);
-      if (finalText) {
-        setInterimText('');
-        // Add user message
-        const userMsgId = Date.now().toString();
-        setMessages(prev => [
-          ...prev,
-          { id: userMsgId, sender: 'user', text: finalText, timestamp: new Date() },
-        ]);
-        queryAdvisory(finalText);
+      
+      if (finalForThisEvent) {
+        accumulatedTranscriptRef.current += finalForThisEvent;
       }
+      interimTextRef.current = interim;
+      
+      // Update UI state so user sees what they are saying
+      setInterimText((accumulatedTranscriptRef.current + ' ' + interim).trim());
     };
 
     recognition.onerror = (event: any) => {
       console.error('SpeechRecognition error', event.error);
       setRecording(false);
       setInterimText('');
+      accumulatedTranscriptRef.current = '';
+      interimTextRef.current = '';
       if (event.error !== 'aborted') {
         const msg =
           event.error === 'not-allowed'
@@ -215,8 +316,12 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
     };
 
     recognition.onend = () => {
-      setRecording(false);
-      setInterimText('');
+      // If recognitionRef.current is still set, it means the browser stopped listening 
+      // automatically (e.g. due to a long silence timeout). In this case, we act as 
+      // if the user clicked stop so we don't lose their accumulated text.
+      if (recognitionRef.current) {
+        stopRecording();
+      }
     };
 
     recognitionRef.current = recognition;
@@ -272,50 +377,15 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
         timestamp: new Date()
       }]);
 
-      // Speak the greeting with improved voice selection, then auto-start listening
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        const bcp47 = LANG_BCP47[language] ?? 'hi-IN';
-        const utterance = new SpeechSynthesisUtterance(greetingMsg);
-        utterance.lang = bcp47;
-
-        // Select best voice (same logic as speakText)
-        const availableVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
-        const langVoices = availableVoices.filter(v => v.lang.startsWith(bcp47.split('-')[0]) || v.lang.replace('_', '-').startsWith(bcp47.split('-')[0]));
-        const bestVoice = langVoices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('kalpana'))
-                       || langVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft'))
-                       || langVoices[0]
-                       || null;
-        if (bestVoice) utterance.voice = bestVoice;
-
-        const isEnglish = language === 'en';
-        utterance.rate = isEnglish ? 0.95 : 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        setIsSpeaking(msgId);
-
-        utterance.onend = () => {
-          setIsSpeaking(null);
-          if (browserSTTSupported) {
-            startRecording();
-          }
-        };
-
-        utterance.onerror = () => {
-          setIsSpeaking(null);
-          if (browserSTTSupported) {
-            startRecording();
-          }
-        };
-
-        utteranceRef.current = utterance;
-        setTimeout(() => {
-          window.speechSynthesis.speak(utterance);
-        }, 400);
-      }
+      // Speak the greeting with high-quality TTS, then auto-start listening
+      speakText(greetingMsg, msgId).then(() => {
+        // If we want to auto-listen after greeting, we can hook it into audio onended
+        // But for simplicity with async API, let's just let user press mic.
+        // Actually, we can hook it into `audio.onended` by passing a callback, 
+        // but it's cleaner to let `speakText` just speak and user presses mic.
+      });
     }
-  }, [isOpen, language, browserSTTSupported, startRecording, voices]);
+  }, [isOpen, language, browserSTTSupported, startRecording, speakText]);
 
   // ── Early return AFTER all hooks ─────────────────────────────────────────────
   if (!isOpen) return null;
@@ -355,6 +425,9 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
               <option value="mr">Marathi (मराठी)</option>
               <option value="te">Telugu (తెలుగు)</option>
               <option value="kn">Kannada (ಕನ್ನಡ)</option>
+              <option value="gu">Gujarati (ગુજરાતી)</option>
+              <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+              <option value="ta">Tamil (தமிழ்)</option>
               <option value="en">English</option>
             </select>
 
@@ -366,6 +439,24 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
             </button>
           </div>
         </header>
+
+        {/* TTS Info Banner */}
+        {language !== 'en' && language !== 'hi' && (
+          <div className="bg-blue-50 border-b border-blue-100 px-5 py-2 flex gap-2 items-start text-[11px] text-blue-700 flex-shrink-0">
+            <Info size={14} className="flex-shrink-0 mt-0.5 text-blue-500" />
+            <p>
+              <strong>Tip for best voice quality:</strong> Windows may not have a native voice for this language (falling back to Hindi/English). 
+              For native voices, try using <strong>Google Chrome</strong> or install the <strong>Windows Language Pack</strong> for {
+                language === 'mr' ? 'Marathi' :
+                language === 'te' ? 'Telugu' :
+                language === 'kn' ? 'Kannada' :
+                language === 'gu' ? 'Gujarati' :
+                language === 'pa' ? 'Punjabi' :
+                language === 'ta' ? 'Tamil' : 'this language'
+              } (Settings → Time & Language).
+            </p>
+          </div>
+        )}
 
         {/* Conversation */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#fcfaef]/60">
@@ -409,7 +500,9 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
                     : 'bg-white border border-border rounded-tl-none shadow-sm'
                 }`}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {msg.text.replace(/\*\*/g, '').replace(/^\*\s+/gm, '• ')}
+                </p>
 
                 {msg.advisoryType && (
                   <span className="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider bg-[#125106]/10 text-[#125106] px-2 py-0.5 rounded">
@@ -474,9 +567,9 @@ export default function VoiceAssistantModal({ isOpen, onClose, farmerId }: Voice
           {recording && (
             <div className="flex items-center gap-2 text-xs font-bold text-[#125106]">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-              Listening… speak now in {LANG_BCP47[language]}
+              Speak now… (Click Stop when finished)
               {interimText && (
-                <span className="text-muted-foreground font-normal ml-1 truncate max-w-[200px]">
+                <span className="text-muted-foreground font-normal ml-1 truncate max-w-[200px]" title={interimText}>
                   "{interimText}"
                 </span>
               )}

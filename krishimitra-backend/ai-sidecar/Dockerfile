@@ -12,6 +12,8 @@ WORKDIR /app
 # Copy requirements and install dependencies
 # We use CPU-only PyTorch for resource efficiency on local/dev environments
 COPY requirements.txt .
+RUN pip install --no-cache-dir setuptools wheel
+RUN pip install --no-cache-dir --no-build-isolation openai-whisper==20240930
 RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 
 # Copy application code

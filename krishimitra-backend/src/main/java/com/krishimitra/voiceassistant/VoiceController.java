@@ -97,7 +97,7 @@ public class VoiceController {
 
         String intent       = advisoryOrchestrator.detectIntent(queryText);
         // Generate advisory directly in the target language (no translation needed)
-        String advisoryText = advisoryOrchestrator.generateAdvisory(queryText, intent, farmerId, language);
+        String advisoryText = advisoryOrchestrator.generateAdvisory(queryText, intent, farmerId, language, request.getHistory());
 
         VoiceChatResponse response = VoiceChatResponse.builder()
                 .transcribedText(queryText)
@@ -117,5 +117,13 @@ public class VoiceController {
         private String queryText;
         private String language;
         private UUID   farmerId;
+        private java.util.List<ChatMessage> history;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ChatMessage {
+        private String role;
+        private String text;
     }
 }
