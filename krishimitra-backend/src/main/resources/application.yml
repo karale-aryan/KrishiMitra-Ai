@@ -118,3 +118,8 @@ logging:
     com.krishimitra: INFO
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
+
+# ==================== Self-Ping (Render Keep-Alive) ====================
+app:
+  self-ping:
+    base-url: ${RENDER_EXTERNAL_URL:}

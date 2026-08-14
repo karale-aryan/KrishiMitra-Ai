@@ -36,7 +36,8 @@ public class SecurityConfig {
             "/actuator/**",
             "/api/v1/weather/current",
             "/api/v1/weather/forecast",
-            "/api/v1/voice/**"
+            "/api/v1/voice/**",
+            "/api/health"
     };
 
     @Bean
